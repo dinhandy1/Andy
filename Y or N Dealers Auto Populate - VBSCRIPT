@@ -1,0 +1,21 @@
+dlrname = "SELECT cif.company FROM tmr LEFT OUTER JOIN cif ON tmr.child_refno = cif.cifno LEFT OUTER JOIN tmr_udf ON tmr.tmr_id = tmr_udf.tmr_id LEFT OUTER JOIN cif_detail ON cif.cifno = cif_detail.cifno WHERE (tmr.child_type = 11) and tmr.parent_refno = " & trno
+dlrstate ="SELECT cif.state FROM tmr LEFT OUTER JOIN cif ON tmr.child_refno = cif.cifno LEFT OUTER JOIN tmr_udf ON tmr.tmr_id = tmr_udf.tmr_id LEFT OUTER JOIN cif_detail ON cif.cifno = cif_detail.cifno WHERE (tmr.child_type = 2) and.tmr.parent_refno = " & trno
+
+dim dlr				
+dim state
+
+dlr = NLSapp.SQLSelectStatement(dlrname)
+dlrstate = NLSapp.SQLSelectStatement(dlrstate)
+'NLSapp.MessageBox(dlr)
+
+IF (dlr = "Home Depot Interiors" or dlr = "Home Depot Exteriors" or dlr = "Home Depot HVAC" or dlr = "American Standard"  or dlrstate = "NY" or dlrstate = "DC" or dlrstate = "PA" or dlrstate = "MI" or dlrstate = "NJ" or dlrstate = "MA") Then   
+     
+	NLSapp.SetField"TASK_DETAIL_UDF9", "Y"
+       	       
+Else NLSapp.SetField"TASK_DETAIL_UDF9", "N"
+
+End IF
+
+NLSapp.ScriptOn false
+NLSapp.SaveScreen()
+NLSapp.ScriptOn true
