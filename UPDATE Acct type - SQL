@@ -1,0 +1,6 @@
+update loanacct_credit_bureau
+set account_type = '04'
+from loanacct a INNER JOIN loanacct_credit_bureau b ON b.acctrefno = a.acctrefno
+where a.portfolio_code_id = '5'
+and b.account_type = '9A'
+and a.status_code_no = '0'
