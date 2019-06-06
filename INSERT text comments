@@ -1,0 +1,1 @@
+INSERT INTO loanacct_collections(acctrefno, created, category_id, action_code_no, collection_code_no, result_code_no, created_by) SELECT acctrefno, GETDATE(), 4, 34, 41, 41, 221 FROM loanacct WHERE loan_number IN ('66252') 
