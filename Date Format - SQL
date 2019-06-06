@@ -1,0 +1,1 @@
+select CONVERT(varchar(10),CAST(userdef26 AS date),101) userdef26 from loanacct_detail where acctrefno = nls_active_acctrefno 
