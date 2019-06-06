@@ -1,0 +1,1 @@
+REPLACE(REPLACE(REPLACE(a.comments, CHAR(13), ''), CHAR(10), ''), CHAR(9), '') as "Clean Comments"
