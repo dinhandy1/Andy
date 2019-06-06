@@ -1,0 +1,10 @@
+Select  a.loan_number, a.loan_group_no, a.open_date,a.total_current_due_balance, b.*,
+
+
+dbo.NLSDecrypt(SUBSTRING(a.tin,35,LEN(a.tin)), SUBSTRING(a.tin,10,33),'Encryption Key') as SSN, -- Primary SSN
+dbo.NLSDecrypt(SUBSTRING(b.tin2,35,LEN(b.tin2)), SUBSTRING(b.tin2,10,33),'Encryption Key') as COSSN  -- Coborrower SSN
+
+
+From loanacct a INNER JOIN cif b ON b.cifno = a.cifno 
+
+Where a.loan_group_no IN (36,42,45,48,52,53,54)
