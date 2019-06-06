@@ -1,0 +1,3 @@
+--SELECT Convert(Varchar(13), DATEADD(day,15,GETDATE()), 107) from loanacct -- add 45 reg days to date
+
+select Convert (varchar(13), ((DATEADD(d,DATEDIFF(d,0,(DATEADD (d,2,GETDATE()))),15))), 107) -- add 15 business days to date
