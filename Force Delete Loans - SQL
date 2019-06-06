@@ -1,0 +1,25 @@
+use nls
+
+SELECT * into loanacct_bkup FROM loanacct
+where status_code_no = 1
+
+--select * from loanacct_bkup
+--delete from loanacct_bkup
+
+begin tran
+DELETE FROM loanacct_latenotice_detail
+FROM         loanacct_latenotice_detail INNER JOIN
+                      loanacct_latenotice ON loanacct_latenotice_detail.statement_row_id = loanacct_latenotice.statement_row_id INNER JOIN
+                      loanacct_bkup ON loanacct_latenotice.acctrefno = loanacct_bkup.acctrefno
+--WHERE     (loanacct_bkup.acctrefno = '204')
+
+commit
+
+
+begin tran
+DELETE FROM loanacct_latenotice
+FROM         loanacct_latenotice INNER JOIN
+                      loanacct_bkup ON loanacct_latenotice.acctrefno = loanacct_bkup.acctrefno
+--WHERE     (loanacct_bkup.acctrefno = '204')
+
+commit
