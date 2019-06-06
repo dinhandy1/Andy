@@ -1,0 +1,7 @@
+begin tran
+update loanacct
+set status_code_no = 1  --status code for CLOSED
+where loan_number = 47050 -- Loan Number
+
+commit
+--rollback
