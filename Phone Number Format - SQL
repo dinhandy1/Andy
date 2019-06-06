@@ -1,0 +1,5 @@
+select  Case When userdef02 is not null then '(' + left(userdef02,3) + ') ' + SUBSTRING(userdef02, 4, 3) +'-'+right(userdef02,4)   else '(' + userdef02 + ') '+left(userdef02,3)+'-'+right(userdef02,4) END 
+
+FROM tmr_udf INNER JOIN tmr ON tmr.tmr_id = tmr_udf.tmr_id WHERE tmr.child_type = 2 AND tmr.parent_refno = NLS_ACTIVE_REFNO
+
+--Word Mergefield
