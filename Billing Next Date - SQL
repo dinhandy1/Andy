@@ -1,0 +1,12 @@
+SELECT        
+   ach.acctrefno, ach.billing_next_date, 
+   DATEADD(mm, 1, billing_next_date) as billing_next_period, 
+   DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) today, ach.status, description
+FROM            
+   loanacct_ach ach
+WHERE        
+   (ach.billing_next_date > DATEADD(day, DATEDIFF(day, 1, GETDATE()), 0)) 
+   AND (ach.billing_next_date < DATEADD(mm, 1, ach.billing_next_date))
+   AND (ach.billing_next_date < '2019-03-01')
+ORDER BY 
+   ach.billing_next_date
