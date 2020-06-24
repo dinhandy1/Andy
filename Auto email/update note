@@ -1,0 +1,105 @@
+DECLARE 
+	@contactperson nvarchar(MAX)
+	,@contactemail nvarchar(MAX)
+	,@body nvarchar(MAX)
+	,@parentrefno nvarchar(MAX)
+	,@appdt nvarchar (MAX)
+	,@appid nvarchar (MAX)
+	,@appamt nvarchar (MAX)
+	,@dealer nvarchar (MAX)
+	,@bn nvarchar (MAX)
+	,@status nvarchar (MAX)
+	,@fn nvarchar (MAX)
+	,@ln nvarchar (MAX)
+	,@ad nvarchar (MAX)
+	,@city nvarchar (MAX)
+	,@st nvarchar (MAX)
+	,@zip nvarchar (MAX)
+	,@jn nvarchar (MAX)
+	,@sub nvarchar (MAX)
+	,@to nvarchar (MAX)
+	
+	
+DECLARE Contacts CURSOR LOCAL FAST_FORWARD READ_ONLY FOR
+	SELECT     nls_access.dbo.qryEmail_Fup_Docs_Cust_3dayNotice.[Contact Email], 
+nls_access.dbo.qryEmail_Fup_Docs_Cust_3dayNotice.[Contact Person], 
+nls_access.dbo.qryEmail_Fup_Docs_Cust_3dayNotice.Parent_refno, 
+nls_access.dbo.qryEmail_Fup_Docs_Cust_3dayNotice.amount_financed, 
+nls_access.dbo.qryEmail_Fup_Docs_Cust_3dayNotice.appid,
+nls_access.dbo.qryEmail_Fup_Docs_Cust_3dayNotice.firstname1,
+nls_access.dbo.qryEmail_Fup_Docs_Cust_3dayNotice.lastname1,
+nls_access.dbo.qryEmail_Fup_Docs_Cust_3dayNotice.street_address1,
+nls_access.dbo.qryEmail_Fup_Docs_Cust_3dayNotice.city,
+nls_access.dbo.qryEmail_Fup_Docs_Cust_3dayNotice.state,
+nls_access.dbo.qryEmail_Fup_Docs_Cust_3dayNotice.zip,
+nls_access.dbo.qryEmail_Fup_Docs_Cust_3dayNotice.dealer
+FROM         nls_access.dbo.qryEmail_Fup_Docs_Cust_3dayNotice;
+
+OPEN Contacts;
+WHILE 1 = 1
+BEGIN
+	FETCH NEXT FROM Contacts INTO @contactemail, @contactperson, @parentrefno, @appamt, @appid, @fn, @ln, @ad, @city, @st, @zip, @dealer;
+	IF @@FETCH_STATUS = -1 BREAK;
+	
+	SET @body = 
+	'FCC Finance, LLC recently approved your application to finance the home improvement project with ' + @dealer  + '.
+ 
+	In order to complete this process and get your job into production we need the following items sent to us as soon as possible:
+ 
+	1. Proof of Income any of these are acceptable:
+ 
+	·        Current Employer Paystub 
+
+	·        Retirement Income (need award letter or bank statement reflecting deposits, customer and bank’s names
+ 
+	·        Tax Returns (2 Years with "ALL" schedules) – Applies only if Self-Employed
+ 
+	2. Executed Loan Docs— Please access the email "sent" to you via DocuSign. Review the loan agreement and process your electronic signature.  If the email is not in your inbox, please search your "spam or junk folder". 
+ 
+	3. Current Mortgage Statement (if you have an open Mortgage)
+
+	4. Copy of driver’s license(s)
+ 
+	For your convenience you can send this information to us via the following means:
+ 
+	Secure Fax: (866) 928-4413
+ 
+	Secure Email: apps@fccfinance.com
+ 
+
+	Should you have any questions or concerns feel free to reach out to us at (800) 777-1665.'
+	
+	SET @sub = 'Approval ' + @parentrefno  + ' ' + @ln;
+	SET @to = @contactemail;
+
+	EXECUTE msdb.dbo.sp_send_dbmail
+    @profile_name = 'Task Management',
+		@subject = @sub,
+		@recipients = @to,
+		@copy_recipients ='apps@fccfinance.com',
+		@body = @body;
+		
+
+		
+		
+END
+CLOSE Contacts;
+DEALLOCATE Contacts;
+RETURN;
+GO
+
+_______________________________________________________
+
+INSERT INTO nls_orig.dbo.task_comments
+ (task_refno, category_id, created, created_by, private, comment_type, comments, comment_description)
+SELECT     TOP (100) PERCENT qryLoanInfo.parent_refno, 21 AS category_id, GETDATE() AS created, 0 AS created_by, 0 AS private, 0 AS comment_type, 
+                      'Doc sent follow up email sent to ' + qryApplicant.email AS comments, 'Doc Sent Follow-up' AS comment_description
+FROM         qryLoanInfo INNER JOIN
+                      qryTaskWorkflows ON qryLoanInfo.parent_refno = qryTaskWorkflows.task_refno LEFT OUTER JOIN
+                      qryApplicant ON qryLoanInfo.parent_refno = qryApplicant.parent_refno LEFT OUTER JOIN
+                      NLS_Orig.dbo.task_comments ON qryLoanInfo.parent_refno = NLS_Orig.dbo.task_comments.task_refno LEFT OUTER JOIN
+                      NLS_Orig.dbo.task_detail ON qryLoanInfo.parent_refno = NLS_Orig.dbo.task_detail.task_refno
+WHERE     (qryLoanInfo.[Loan Status] = 'Approved') AND (NLS_Orig.dbo.task_detail.userdef14 IS NULL) AND (qryTaskWorkflows.action = 'Docs Sent') AND 
+                      (qryTaskWorkflows.result = 'Customer') AND (qryApplicant.email IS NOT NULL) AND (qryApplicant.email <> ' ') AND (CONVERT(VARCHAR(25), 
+                      qryTaskWorkflows.result_date , 101) = CONVERT(VARCHAR(25), GETDATE()-3, 101))
+GROUP BY qryLoanInfo.parent_refno, qryApplicant.email
